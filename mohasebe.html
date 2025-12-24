@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Colleagues Transfers</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#0f1a3a;
+      --card: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --good: #33e1a0;
+      --warn: #ffcc66;
+      --blue: #6aa8ff;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 22px;
+      --radius2: 16px;
+      --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(106,168,255,.20), transparent 60%),
+        radial-gradient(900px 500px at 80% 0%, rgba(51,225,160,.16), transparent 55%),
+        radial-gradient(700px 500px at 80% 90%, rgba(255,204,102,.12), transparent 55%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px 14px;
+    }
+
+    .wrap{ width:min(980px, 100%); }
+
+    .header{ text-align:center; margin-bottom: 16px; }
+    .title{
+      font-size: clamp(22px, 2.6vw, 34px);
+      margin: 0 0 6px;
+      line-height: 1.25;
+      letter-spacing: .2px;
+    }
+    .subtitle{
+      margin:0;
+      color: var(--muted);
+      font-size: clamp(13px, 1.6vw, 16px);
+      line-height: 1.5;
+    }
+
+    .card{
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.05));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(400px 200px at 20% 0%, rgba(106,168,255,.22), transparent 70%),
+        radial-gradient(450px 220px at 80% 20%, rgba(51,225,160,.18), transparent 70%),
+        radial-gradient(500px 280px at 50% 120%, rgba(255,204,102,.12), transparent 70%);
+      filter: blur(8px);
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .content{ position:relative; padding: 18px; }
+
+    label{
+      display:block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .field{
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      padding: 12px 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    input{
+      width:100%;
+      border:0;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 18px;
+      padding: 2px 0;
+      direction: ltr;
+      text-align: left;
+    }
+    input::placeholder{ color: rgba(255,255,255,.35); }
+
+    .topGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      align-items:end;
+    }
+
+    .actions{
+      margin-top: 12px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 14px;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      min-width: 160px;
+    }
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.26);
+      background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
+    }
+
+    .hint{
+      text-align:center;
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .line{ height:1px; background: rgba(255,255,255,.10); margin: 14px 0; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .box{
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius2);
+      padding: 14px;
+      min-height: 132px;
+      position:relative;
+      overflow:hidden;
+    }
+    .box::after{
+      content:"";
+      position:absolute;
+      inset:-60px -30px auto auto;
+      width:180px; height:180px;
+      background: radial-gradient(circle at 30% 30%, rgba(106,168,255,.20), transparent 60%);
+      transform: rotate(12deg);
+      opacity:.8;
+      pointer-events:none;
+    }
+
+    .k{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .tag{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      white-space:nowrap;
+    }
+    .tag.good{ border-color: rgba(51,225,160,.35); color: rgba(51,225,160,.95); }
+    .tag.warn{ border-color: rgba(255,204,102,.35); color: rgba(255,204,102,.95); }
+    .tag.blue{ border-color: rgba(106,168,255,.35); color: rgba(106,168,255,.95); }
+
+    .value{
+      font-size: clamp(18px, 2.1vw, 24px);
+      font-weight: 780;
+      letter-spacing: .2px;
+      direction:ltr;
+      text-align:left;
+      font-variant-numeric: tabular-nums;
+      position:relative;
+      z-index:1;
+    }
+    .sub{
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 6px;
+      line-height: 1.5;
+      position:relative;
+      z-index:1;
+    }
+
+    .pair{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .pairLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      position:relative;
+      z-index:1;
+    }
+    .pairKey{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      letter-spacing:.3px;
+      text-transform: uppercase;
+    }
+    .pairVal{
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .summary{
+      margin-top: 12px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 12px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 16px;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .summary b{
+      color: rgba(255,255,255,.95);
+      font-variant-numeric: tabular-nums;
+      direction:ltr;
+    }
+    .pill{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
+    }
+
+    /* SMS area stays Persian */
+    .sms{
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.12));
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .smsTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+    .smsTitle{ font-size: 14px; color: rgba(255,255,255,.88); margin:0; }
+
+    textarea{
+      width:100%;
+      margin-top: 10px;
+      min-height: 140px;
+      resize: vertical;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.92);
+      padding: 12px 12px;
+      font-size: 14px;
+      line-height: 1.8;
+      outline:none;
+    }
+
+    .copyBtn{ min-width: 160px; }
+    .toast{
+      margin-top: 10px;
+      text-align:center;
+      color: rgba(51,225,160,.95);
+      font-size: 12.5px;
+      min-height: 18px;
+    }
+
+    @media (max-width: 860px){
+      .topGrid{ grid-template-columns: 1fr; }
+      button{ width: 100%; min-width: unset; }
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1 class="title">Colleagues Transfers</h1>
+      <p class="subtitle">
+        Inputs are IRR (Rial). Calculations happen in IRR. SMS shows amounts in Toman (IRR ÷ 10).
+        Payment rounding for N/A/P: remainder &ge; 300 → up to next 1,000, otherwise down.
+oti
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="content">
+
+        <!-- Inputs -->
+        <div class="topGrid">
+          <div>
+            <label for="amountSite">Site (Gateway Total) — IRR:</label>
+            <div class="field">
+              <input id="amountSite" inputmode="decimal" placeholder="e.g. 25000000" autocomplete="off" />
+            </div>
+          </div>
+
+          <div>
+            <label for="amountCard">Card (empty = 0) — IRR:</label>
+            <div class="field">
+              <input id="amountCard" inputmode="decimal" placeholder="e.g. 1500000" autocomplete="off" />
+            </div>
+          </div>
+
+          <div>
+            <label for="dateText">Date (for SMS):</label>
+            <div class="field">
+              <input id="dateText" inputmode="text" placeholder="e.g. 24" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnCalc">Calculate</button>
+          <button id="btnClear" type="button">Clear</button>
+        </div>
+
+        <div class="hint">
+          Card is optional (treated as 0 if empty). Persian/Arabic digits, commas and spaces are accepted.
+        </div>
+
+        <div class="line"></div>
+
+        <!-- Outputs (IRR) -->
+        <div class="grid">
+          <div class="box">
+            <div class="k">
+              <span class="tag good">N</span>
+              <span class="tag">7% of Total</span>
+            </div>
+            <div class="value" id="v7">—</div>
+            <div class="sub">N = 7% of (Site + Card) — IRR</div>
+          </div>
+
+          <div class="box">
+            <div class="k">
+              <span class="tag warn">Remaining</span>
+              <span class="tag">Total − N</span>
+            </div>
+            <div class="value" id="vRemain">—</div>
+            <div class="sub">Remaining after subtracting N — IRR</div>
+          </div>
+
+          <div class="box">
+            <div class="k">
+              <span class="tag blue">A & P</span>
+              <span class="tag">from Remaining</span>
+            </div>
+
+            <div class="pair">
+              <div class="pairLine">
+                <span class="pairKey">A (30%)</span>
+                <span class="pairVal" id="vA">—</span>
+              </div>
+              <div class="pairLine">
+                <span class="pairKey">P (20%)</span>
+                <span class="pairVal" id="vP">—</span>
+              </div>
+            </div>
+
+            <div class="sub">A = 30% of Remaining, P = 20% of Remaining — IRR</div>
+          </div>
+        </div>
+
+        <div class="summary" aria-live="polite">
+          <div class="pill">Site (IRR): <b id="sSite">—</b></div>
+          <div class="pill">Card (IRR): <b id="sCard">—</b></div>
+          <div class="pill">Total (IRR): <b id="sTotal">—</b></div>
+          <div class="pill">N (IRR): <b id="sN">—</b></div>
+          <div class="pill">Remaining (IRR): <b id="sRemain">—</b></div>
+          <div class="pill">A (IRR): <b id="sA">—</b></div>
+          <div class="pill">P (IRR): <b id="sP">—</b></div>
+        </div>
+
+        <!-- SMS + Copy (Persian only, English digits) -->
+        <div class="sms" dir="rtl" lang="fa">
+          <div class="smsTop">
+            <p class="smsTitle">متن آماده پیامک (به تومان با عدد انگلیسی)</p>
+            <button class="copyBtn" id="btnCopy" type="button">کپی متن</button>
+          </div>
+          <textarea id="smsText" readonly></textarea>
+          <div class="toast" id="toast"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const elSite = document.getElementById("amountSite");
+    const elCard = document.getElementById("amountCard");
+    const elDate = document.getElementById("dateText");
+
+    const btnCalc  = document.getElementById("btnCalc");
+    const btnClear = document.getElementById("btnClear");
+    const btnCopy  = document.getElementById("btnCopy");
+
+    const v7      = document.getElementById("v7");
+    const vRemain = document.getElementById("vRemain");
+    const vA      = document.getElementById("vA");
+    const vP      = document.getElementById("vP");
+
+    const sSite   = document.getElementById("sSite");
+    const sCard   = document.getElementById("sCard");
+    const sTotal  = document.getElementById("sTotal");
+    const sN      = document.getElementById("sN");
+    const sRemain = document.getElementById("sRemain");
+    const sA      = document.getElementById("sA");
+    const sP      = document.getElementById("sP");
+
+    const smsText = document.getElementById("smsText");
+    const toast   = document.getElementById("toast");
+
+    function digitsToEnglish(str){
+      const fa = "۰۱۲۳۴۵۶۷۸۹";
+      const ar = "٠١٢٣٤٥٦٧٨٩";
+      let s = String(str ?? "");
+      for (let i=0; i<10; i++){
+        s = s.replaceAll(fa[i], String(i)).replaceAll(ar[i], String(i));
+      }
+      return s;
+    }
+
+    // Accept Persian/Arabic digits + separators
+    function normalizeNumber(str){
+      if (!str) return NaN;
+      let s = digitsToEnglish(String(str).trim());
+      s = s.replaceAll(",", "")
+           .replaceAll("٬", "")
+           .replaceAll(" ", "");
+      s = s.replaceAll("،", ".").replaceAll("/", ".");
+      return Number(s);
+    }
+
+    // English digits formatting
+    function fmtEn(n, maxFrac = 0){
+      if (!isFinite(n)) return "—";
+      const hasDecimal = Math.abs(n % 1) > 1e-9;
+      const mf = Math.min(maxFrac, 6);
+      return n.toLocaleString("en-US", {
+        maximumFractionDigits: hasDecimal ? mf : 0
+      });
+    }
+
+    // Convert IRR -> Toman
+    function toToman(irr){
+      return irr / 10;
+    }
+
+    // Rounding rule for employee payment in TOMAN (N/A/P):
+    // remainder < 300  -> down to previous 1000
+    // remainder >= 300 -> up to next 1000
+    function roundPaymentToman(x){
+      if (!isFinite(x)) return NaN;
+      const base = Math.floor(x);        // integer toman
+      const rem = ((base % 1000) + 1000) % 1000; // safe
+      const down = base - rem;
+      return (rem >= 300) ? (down + 1000) : down;
+    }
+
+    function tomanTextEn(n){
+      return `${fmtEn(n, 2)} تومان`;
+    }
+
+    function buildSms(dateStrEn, siteT, cardT, nT_round, aT_round, pT_round){
+      return [
+        `تاریخ ${dateStrEn}`.trim(),
+        `سایت: ${tomanTextEn(siteT)}`,
+        `کارتی: ${tomanTextEn(cardT)}`,
+        `ن: ${tomanTextEn(nT_round)}`,
+        `آ: ${tomanTextEn(aT_round)}`,
+        `پ: ${tomanTextEn(pT_round)}`
+      ].join("\n");
+    }
+
+    function setInvalid(){
+      v7.textContent = vRemain.textContent = "—";
+      vA.textContent = vP.textContent = "—";
+
+      sSite.textContent = sCard.textContent = sTotal.textContent =
+      sN.textContent = sRemain.textContent = sA.textContent = sP.textContent = "—";
+
+      const dateEn = digitsToEnglish(elDate.value.trim());
+      smsText.value = [
+        `تاریخ ${dateEn}`.trim(),
+        `سایت: — تومان`,
+        `کارتی: — تومان`,
+        `ن: — تومان`,
+        `آ: — تومان`,
+        `پ: — تومان`
+      ].join("\n");
+    }
+
+    function calc(){
+      const siteIRR = normalizeNumber(elSite.value);
+      const cardRawIRR = normalizeNumber(elCard.value);
+
+      const siteOk = isFinite(siteIRR) && siteIRR >= 0;
+      const cardIRR = (isFinite(cardRawIRR) && cardRawIRR >= 0) ? cardRawIRR : 0;
+
+      if (!siteOk){
+        setInvalid();
+        return;
+      }
+
+      const totalIRR = siteIRR + cardIRR;
+
+      // Calculate in IRR
+      const N_IRR = totalIRR * 0.07;
+      const remainIRR = totalIRR - N_IRR;
+      const A_IRR = remainIRR * 0.30;
+      const P_IRR = remainIRR * 0.20;
+
+      // UI outputs in IRR (English digits)
+      v7.textContent = fmtEn(N_IRR, 2);
+      vRemain.textContent = fmtEn(remainIRR, 2);
+      vA.textContent = fmtEn(A_IRR, 2);
+      vP.textContent = fmtEn(P_IRR, 2);
+
+      sSite.textContent = fmtEn(siteIRR, 0);
+      sCard.textContent = fmtEn(cardIRR, 0);
+      sTotal.textContent = fmtEn(totalIRR, 0);
+      sN.textContent = fmtEn(N_IRR, 2);
+      sRemain.textContent = fmtEn(remainIRR, 2);
+      sA.textContent = fmtEn(A_IRR, 2);
+      sP.textContent = fmtEn(P_IRR, 2);
+
+      // SMS values in TOMAN (English digits) + rounding rule for N/A/P only
+      const siteT = toToman(siteIRR);
+      const cardT = toToman(cardIRR);
+
+      const N_T = toToman(N_IRR);
+      const A_T = toToman(A_IRR);
+      const P_T = toToman(P_IRR);
+
+      const N_T_round = roundPaymentToman(N_T);
+      const A_T_round = roundPaymentToman(A_T);
+      const P_T_round = roundPaymentToman(P_T);
+
+      const dateEn = digitsToEnglish(elDate.value.trim());
+
+      smsText.value = buildSms(dateEn, siteT, cardT, N_T_round, A_T_round, P_T_round);
+    }
+
+    async function copySms(){
+      try{
+        await navigator.clipboard.writeText(smsText.value);
+        toast.textContent = "✅ کپی شد!";
+        setTimeout(() => toast.textContent = "", 1500);
+      }catch(e){
+        smsText.focus();
+        smsText.select();
+        const ok = document.execCommand("copy");
+        toast.textContent = ok ? "✅ کپی شد!" : "❌ کپی نشد (مرورگر اجازه نداد)";
+        setTimeout(() => toast.textContent = "", 1800);
+      }
+    }
+
+    btnCalc.addEventListener("click", calc);
+    btnCopy.addEventListener("click", copySms);
+
+    btnClear.addEventListener("click", () => {
+      elSite.value = "";
+      elCard.value = "";
+      elDate.value = "";
+      elSite.focus();
+      calc();
+    });
+
+    elSite.addEventListener("input", calc);
+    elCard.addEventListener("input", calc);
+    elDate.addEventListener("input", calc);
+
+    calc();
+  </script>
+</body>
+</html>
