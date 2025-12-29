@@ -140,9 +140,8 @@
       align-items:end;
     }
 
-    /* row for Date + Score (wide: side-by-side) */
     .row2Wrap{
-      grid-column: 1 / -1; /* full width */
+      grid-column: 1 / -1;
       display:grid;
       grid-template-columns: 1fr auto;
       gap: 12px;
@@ -150,12 +149,11 @@
       margin-top: 2px;
     }
 
-    /* Score (only Score text) */
     .scoreBox{
       display:flex;
       align-items:center;
       gap: 10px;
-      padding: 12px 14px;          /* match input height visually */
+      padding: 12px 14px;
       border-radius: 16px;
       border: 1px solid var(--scoreAccB);
       background:
@@ -208,10 +206,7 @@
     }
     button:active{ transform: translateY(0px) scale(.99); }
 
-    /* Calculate click feedback */
-    .btnFlash{
-      animation: btnFlash .45s ease-out;
-    }
+    .btnFlash{ animation: btnFlash .45s ease-out; }
     @keyframes btnFlash{
       0%   { transform: translateY(0) scale(1); box-shadow: none; }
       45%  { transform: translateY(-1px) scale(1.02); box-shadow: 0 0 0 6px rgba(255,149,56,.10), 0 18px 40px rgba(0,0,0,.28); }
@@ -245,10 +240,7 @@
       overflow:hidden;
     }
 
-    /* output pulse feedback */
-    .pulse{
-      animation: pulseGlow .45s ease-out;
-    }
+    .pulse{ animation: pulseGlow .45s ease-out; }
     @keyframes pulseGlow{
       0%   { box-shadow: none; }
       45%  { box-shadow: 0 0 0 6px rgba(255,149,56,.10), 0 18px 40px rgba(0,0,0,.22); }
@@ -374,7 +366,7 @@
     textarea{
       width:100%;
       margin-top: 10px;
-      min-height: 140px;
+      min-height: 160px;
       resize: vertical;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.14);
@@ -397,7 +389,7 @@
 
     @media (max-width: 920px){
       .topGrid{ grid-template-columns: 1fr; }
-      .row2Wrap{ grid-template-columns: 1fr; } /* Date then Score stack */
+      .row2Wrap{ grid-template-columns: 1fr; }
       button{ width: 100%; min-width: unset; }
       .grid{ grid-template-columns: 1fr; }
       .scoreBox{ width: 100%; }
@@ -440,7 +432,6 @@
             </div>
           </div>
 
-          <!-- Date + Score sits UP here (wide) -->
           <div class="row2Wrap">
             <div>
               <label for="dateText">Date (for SMS):</label>
@@ -563,11 +554,10 @@
     const outputGrid = document.getElementById("outputGrid");
     const summaryBox = document.getElementById("summaryBox");
 
-    const SCORE_BONUS_TOMAN = 1500000; // added to P in SMS only (when Score is checked)
+    const SCORE_BONUS_TOMAN = 1500000;
 
     function flash(el, className, ms=450){
       el.classList.remove(className);
-      // force reflow
       void el.offsetWidth;
       el.classList.add(className);
       setTimeout(() => el.classList.remove(className), ms);
@@ -600,6 +590,7 @@
 
     function toToman(irr){ return irr / 10; }
 
+    // same rounding rule for N/A/P and also for "ع"
     // remainder < 300  -> down to previous 1000
     // remainder >= 300 -> up to next 1000
     function roundPaymentToman(x){
@@ -612,14 +603,15 @@
 
     function tomanTextEn(n){ return `${fmtEn(n, 0)} تومان`; }
 
-    function buildSms(dateStrEn, siteT, cardT, nT_round, aT_round, pT_round){
+    function buildSms(dateStrEn, siteT, cardT, ainT, nT, aT, pT){
       return [
         `تاریخ ${dateStrEn}`.trim(),
         `سایت: ${tomanTextEn(siteT)}`,
         `کارتی: ${tomanTextEn(cardT)}`,
-        `ن: ${tomanTextEn(nT_round)}`,
-        `آ: ${tomanTextEn(aT_round)}`,
-        `پ: ${tomanTextEn(pT_round)}`
+        `ع: ${tomanTextEn(ainT)}`,
+        `ن: ${tomanTextEn(nT)}`,
+        `آ: ${tomanTextEn(aT)}`,
+        `پ: ${tomanTextEn(pT)}`
       ].join("\n");
     }
 
@@ -634,6 +626,7 @@
         `تاریخ ${dateEn}`.trim(),
         `سایت: — تومان`,
         `کارتی: — تومان`,
+        `ع: — تومان`,
         `ن: — تومان`,
         `آ: — تومان`,
         `پ: — تومان`
@@ -654,6 +647,7 @@
       const siteTotalIRR = site1IRR + site2IRR;
       const totalIRR = siteTotalIRR + cardIRR;
 
+      // Existing IRR calculations (unchanged)
       const N_IRR = totalIRR * 0.07;
       const remainIRR = totalIRR - N_IRR;
       const A_IRR = remainIRR * 0.30;
@@ -677,18 +671,19 @@
       const siteT = toToman(siteTotalIRR);
       const cardT = toToman(cardIRR);
 
-      const N_T = toToman(N_IRR);
-      const A_T = toToman(A_IRR);
+      // "ع" = 3% of total (SMS only), rounded SAME as others
+      const Ain_IRR = totalIRR * 0.03;
+      const Ain_T_round = roundPaymentToman(toToman(Ain_IRR));
+
+      const N_T_round = roundPaymentToman(toToman(N_IRR));
+      const A_T_round = roundPaymentToman(toToman(A_IRR));
+
       const P_T = toToman(P_IRR);
-
-      const N_T_round = roundPaymentToman(N_T);
-      const A_T_round = roundPaymentToman(A_T);
-
       const P_T_withScore = P_T + (elScore.checked ? SCORE_BONUS_TOMAN : 0);
       const P_T_round = roundPaymentToman(P_T_withScore);
 
       const dateEn = digitsToEnglish(elDate.value.trim());
-      smsText.value = buildSms(dateEn, siteT, cardT, N_T_round, A_T_round, P_T_round);
+      smsText.value = buildSms(dateEn, siteT, cardT, Ain_T_round, N_T_round, A_T_round, P_T_round);
 
       return true;
     }
